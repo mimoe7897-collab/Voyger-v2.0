@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="my">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MYANCORE VOYAGER v2.0 | MASTER HUB</title>
+    <link rel="stylesheet" href="https://pyscript.net/releases/2024.1.1/core.css">
+    <script type="module" src="https://pyscript.net/releases/2024.1.1/core.js"></script>
+    <style>
+        :root { --neon-green: #00ff88; --neon-blue: #00d9ff; --neon-red: #ff3e3e; --neon-yellow: #f3ff00; --bg: #050505; }
+        body { background: var(--bg); color: #fff; font-family: 'Consolas', monospace; margin: 0; overflow-x: hidden; }
+        .header { background: #111; padding: 20px; text-align: center; border-bottom: 2px solid var(--neon-blue); box-shadow: 0 0 20px rgba(0, 217, 255, 0.3); }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px; padding: 20px; }
+        
+        /* Dashboard Cards */
+        .card { background: #111; border: 1px solid #333; border-radius: 12px; padding: 20px; position: relative; transition: 0.3s; }
+        .card:hover { border-color: var(--neon-blue); box-shadow: 0 0 15px rgba(0, 217, 255, 0.2); }
+        .label { font-size: 0.8rem; color: #888; text-transform: uppercase; letter-spacing: 2px; }
+        .value { font-size: 2.2rem; font-weight: bold; margin: 10px 0; color: var(--neon-green); }
+        .status { font-size: 0.7rem; font-family: monospace; }
+        
+        .prediction-zone { grid-column: 1 / -1; background: radial-gradient(circle at center, #001a11 0%, #050505 100%); border: 2px solid var(--neon-green); text-align: center; padding: 40px; border-radius: 20px; }
+        .essence-box { font-size: 5rem; letter-spacing: 15px; color: var(--neon-green); text-shadow: 0 0 30px var(--neon-green); margin: 20px 0; }
+        
+        .loader { font-size: 0.7rem; color: var(--neon-blue); text-align: center; padding: 10px; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
+    </style>
+    <py-config> packages = ["yfinance", "pandas"] </py-config>
+</head>
+<body>
+
+<div class="header">
+    <h1 style="margin:0; letter-spacing:5px;">MYANCORE VOYAGER <span style="color:var(--neon-blue);">v2.0</span></h1>
+    <div id="sys_clock" style="color:var(--neon-yellow); font-size:0.9rem; margin-top:5px;">SYSTEM INITIALIZING...</div>
+</div>
+
+<div class="grid">
+    <div class="prediction-zone">
+        <div class="label">AI Matrix Strategy (SET Index)</div>
+        <div id="essence_out" class="essence-box">🛡️</div>
+        <div id="prediction_status" class="status" style="color:var(--neon-red);">[ ENCRYPTED - WAITING FOR TIME WINDOW ]</div>
+    </div>
+
+    <div class="card">
+        <div class="label">Thai SET Index</div>
+        <div id="set_val" class="value">--</div>
+        <div id="set_change" class="status">SYNCING...</div>
+    </div>
+
+    <div class="card">
+        <div class="label">Gold Price (XAU/USD)</div>
+        <div id="gold_val" class="value">--</div>
+        <div id="gold_change" class="status">SYNCING...</div>
+    </div>
+
+    <div class="card">
+        <div class="label">Bitcoin (BTC)</div>
+        <div id="btc_val" class="value">--</div>
+        <div id="btc_change" class="status">SYNCING...</div>
+    </div>
+</div>
+
+<div id="log" class="loader">INITIALIZING SATELLITE UPLINK...</div>
+
+<script type="py">
+import yfinance as yf
+import js
+from datetime import datetime
+
+async def fetch_all():
+    try:
+        js.document.getElementById("log").innerHTML = "UPLINK ACTIVE: FETCHING DATA..."
+        
+        # ဒေတာအားလုံးကို တစ်ခါတည်း ဆွဲယူခြင်း
+        tickers = {
+            "set": "^SET.BK",
+            "gold": "GC=F",
+            "btc": "BTC-USD"
+        }
+        
+        data = {}
+        for key, sym in tickers.items():
+            t = yf.Ticker(sym)
+            hist = t.history(period="2d")
+            if not hist.empty:
+                last = hist.iloc[-1]
+                prev = hist.iloc[-2]
+                change = last['Close'] - prev['Close']
+                data[key] = {"val": last['Close'], "change": change}
+
+        # UI Update - SET
+        js.document.getElementById("set_val").innerHTML = f"{data['set']['val']:,.2f}"
+        js.document.getElementById("set_change").innerHTML = f"CHG: {data['set']['change']:+.2f}"
+        
+        # UI Update - Gold
+        js.document.getElementById("gold_val").innerHTML = f"${data['gold']['val']:,.2f}"
+        
+        # UI Update - BTC
+        js.document.getElementById("btc_val").innerHTML = f"${data['btc']['val']:,.0f}"
+
+        # 2D PREDICTION LOGIC (Admin's Formula)
+        now = datetime.now()
+        total_mins = now.hour * 60 + now.minute
+        
+        # ၁၁:၃၀ - ၁၂:၀၀ သို့မဟုတ် ၄:၀၀ - ၄:၃၀
+        if (690 <= total_mins < 720) or (960 <= total_mins < 990):
+            # တွက်ချက်ခြင်း (Dummy Logic for display, Formula can be integrated here)
+            js.document.getElementById("essence_out").innerHTML = "84" 
+            js.document.getElementById("prediction_status").innerHTML = "[ SIGNAL UNLOCKED ]"
+            js.document.getElementById("prediction_status").style.color = "#00ff88"
+        else:
+            js.document.getElementById("essence_out").innerHTML = "🛡️"
+            js.document.getElementById("prediction_status").innerHTML = f"[ SECURE MODE | SERVER TIME: {now.strftime('%H:%M')} ]"
+
+        js.document.getElementById("sys_clock").innerHTML = f"NODE_ACTIVE | {now.strftime('%d %b %Y %H:%M:%S')}"
+        js.document.getElementById("log").innerHTML = "CORE SYSTEMS NOMINAL"
+
+    except Exception as e:
+        js.document.getElementById("log").innerHTML = f"CRITICAL ERROR: {str(e)}"
+
+fetch_all()
+</script>
+</body>
+</html>
